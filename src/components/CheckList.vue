@@ -1,5 +1,21 @@
 <template>
   <div class="checklist">
+    <div class="checklist__header">
+      <Progress :percent="progress" />
+      <a-select
+        label-in-value
+        :default-value="selectedTemplate"
+        class="checklist__template-select">
+        <a-select-option
+          v-for="item in templates"
+          :key="item.key"
+          :value="item.key"
+          @click="handleChange(item)">
+          {{ item.value }}
+        </a-select-option>
+      </a-select>
+      <a-button type="primary">Save as Template</a-button>
+    </div>
     <div
       v-for="(_, index) in editableChecklist"
       :key="index"
@@ -19,8 +35,7 @@
       <a-checkbox
         v-model="editableChecklist[index].checked"
         @change="updateProgress"
-        class="checklist-checkbox">
-      </a-checkbox>
+        class="checklist-checkbox"></a-checkbox>
       <input
         type="text"
         class="checklist__item-input"
@@ -29,12 +44,12 @@
         @blur="saveItem(index)"
         @keyup.enter="saveItemAndAddNew(index)" />
     </div>
-    <Progress :percent="progress" />
   </div>
 </template>
 
 <script>
 import { Progress } from 'ant-design-vue';
+
 export default {
   name: 'CheckList',
   components: {
@@ -54,12 +69,72 @@ export default {
       progress: 0,
       draggingIndex: null,
       dragOverIndex: null,
+
+      selectedTemplate: null,
+      templates: [
+        {
+          key: 0,
+          value: 'Select Template',
+        },
+        {
+          key: 1,
+          value: 'Definition of Done',
+          items: [
+            {
+              checked: false,
+              text: 'All acceptance criteria are met',
+            },
+            {
+              checked: false,
+              text: 'Code is reviewed and approved',
+            },
+            {
+              checked: false,
+              text: 'Unit tests are passing',
+            },
+          ],
+        },
+        {
+          key: 2,
+          value: 'Build Steps',
+          items: [
+            {
+              checked: false,
+              text: 'Pull latest code from the repository',
+            },
+            {
+              checked: false,
+              text: 'Install dependencies',
+            },
+            {
+              checked: false,
+              text: 'Run build scripts',
+            },
+            {
+              checked: false,
+              text: 'Generate build artifacts',
+            },
+            {
+              checked: false,
+              text: 'Perform code quality checks',
+            },
+            // Add more build steps as needed
+          ],
+        },
+      ],
     };
   },
-  mounted() {
+  created() {
     this.initEditableChecklist();
+    this.selectedTemplate = this.templates[0];
   },
   methods: {
+    handleChange(template) {
+      console.log('template', template);
+
+      this.editableChecklist = [...this.editableChecklist, ...template.items];
+      this.selectedTemplate = this.templates[0];
+    },
     initEditableChecklist() {
       this.editableChecklist = this.checklist;
     },
@@ -159,13 +234,20 @@ export default {
 <style lang="scss" scoped>
 .checklist {
   font-family: Arial, sans-serif;
-
+  &__header {
+    display: flex;
+  }
+  &__template-select {
+    width: 200px;
+    margin: 0 15px;
+  }
   &__item {
     display: flex;
     align-items: center;
     cursor: pointer;
     padding: 8px;
     border-bottom: 1px solid #ccc;
+
     &.is-dragging {
       opacity: 0.5;
     }
@@ -198,6 +280,7 @@ export default {
   &__item-input a-checkbox {
     width: 100%;
   }
+
   &__icon {
     margin-right: 8px;
   }
