@@ -1,33 +1,36 @@
-current component:
-
 <template>
   <div class="checklist">
     <div
       v-for="(item, index) in editableChecklist"
       :key="index"
-      class="checklist-item"
+      class="checklist__item"
       @click="editItem(index)">
       <a-checkbox
         v-model="editableChecklist[index].checked"
         @change="updateProgress"
-        :disabled="item.editing"
         class="checklist-checkbox">
-        <span v-if="!item.editing">{{ item.text }}</span>
       </a-checkbox>
+
       <input
         type="text"
-        class="edit-input"
-        v-if="item.editing"
+        class="checklist__item-input"
         v-model="editableChecklist[index].text"
         :ref="getRef(index)"
         @blur="saveItem(index)"
         @keyup.enter="saveItemAndAddNew(index)" />
     </div>
+    <Progress :percent="progress" />
   </div>
 </template>
 
 <script>
+import { Progress } from 'ant-design-vue';
+
 export default {
+  name: 'CheckList',
+  components: {
+    Progress,
+  },
   props: {
     checklist: {
       type: Array,
@@ -39,6 +42,7 @@ export default {
       editableChecklist: [],
       timeoutId: null,
       refs: {},
+      progress: 0,
     };
   },
   mounted() {
@@ -46,7 +50,7 @@ export default {
   },
   methods: {
     initEditableChecklist() {
-      this.editableChecklist = JSON.parse(JSON.stringify(this.checklist));
+      this.editableChecklist = this.checklist;
     },
     updateProgress() {
       const checkedItems = this.editableChecklist.filter(
@@ -58,34 +62,36 @@ export default {
     },
     editItem(index) {
       clearTimeout(this.timeoutId);
-      this.editableChecklist[index].editing = true;
       this.$nextTick(() => {
         const input = this.$refs[this.getRef(index)];
         if (input) {
           input.focus();
+          input.select();
         }
       });
     },
-
     saveItem(index) {
       if (this.editableChecklist[index].text.trim() === '') {
         this.editableChecklist.splice(index, 1);
-      } else {
-        this.editableChecklist[index].editing = false;
       }
       this.saveData();
     },
     saveItemAndAddNew(index) {
       this.saveItem(index);
-      this.editableChecklist.push({ text: '', checked: false, editing: true });
+      this.editableChecklist.splice(index + 1, 0, { text: '', checked: false });
       this.$nextTick(() => {
-        const lastIndex = this.editableChecklist.length - 1;
-        const input = this.$refs[this.getRef(lastIndex)];
+        const input = this.$el.querySelectorAll('.checklist__item-input')[
+          index + 1
+        ];
         if (input) {
-          input.focus();
+          this.$nextTick(() => {
+            input.focus();
+            input.select();
+          });
         }
       });
     },
+
     saveData() {
       // Simulate saving the data to a service
       // Replace this with your own implementation
@@ -112,46 +118,42 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss" scoped>
 .checklist {
   font-family: Arial, sans-serif;
-}
+  &__item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
+  }
+  &__item .checklist-checkbox {
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
 
-.checklist-item {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding: 8px;
-  border-bottom: 1px solid #ccc;
-}
+  &__item-text {
+    margin-left: 8px;
+  }
 
-.checklist-checkbox {
-  margin-right: 12px;
-  flex-shrink: 0;
-}
+  &__item-input {
+    border: none;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 4px;
+    margin: 0;
+    outline: none;
+    background-color: transparent;
+    flex-grow: 1;
+    &:focus {
+      background-color: #f5f5f5;
+    }
+  }
 
-.checklist-text {
-  margin-left: 8px;
-  flex-grow: 1;
-}
-
-.edit-input {
-  border: none;
-  font-size: 14px;
-  line-height: 1.5;
-  padding: 4px;
-  margin: 0;
-  outline: none;
-  background-color: transparent;
-  flex-grow: 1;
-}
-
-.edit-input:focus {
-  background-color: #f5f5f5;
-}
-
-a-checkbox {
-  width: 100%;
+  &__item-input a-checkbox {
+    width: 100%;
+  }
 }
 
 a-checkbox span.ant-checkbox-inner {
