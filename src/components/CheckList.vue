@@ -1,16 +1,26 @@
 <template>
   <div class="checklist">
     <div
-      v-for="(item, index) in editableChecklist"
+      v-for="(_, index) in editableChecklist"
       :key="index"
       class="checklist__item"
-      @click="editItem(index)">
+      :class="{
+        'is-dragging': draggingIndex === index,
+        'is-drag-over': dragOverIndex === index,
+      }"
+      draggable="true"
+      @dragstart="drag($event, index)"
+      @dragenter="dragEnter($event, index)"
+      @dragover="dragOver($event, index)"
+      @dragleave="dragLeave"
+      @drop="drop($event)"
+      @dragend="dragLeave">
+      <a-icon type="menu" class="checklist__icon" />
       <a-checkbox
         v-model="editableChecklist[index].checked"
         @change="updateProgress"
         class="checklist-checkbox">
       </a-checkbox>
-
       <input
         type="text"
         class="checklist__item-input"
@@ -25,7 +35,6 @@
 
 <script>
 import { Progress } from 'ant-design-vue';
-
 export default {
   name: 'CheckList',
   components: {
@@ -43,6 +52,8 @@ export default {
       timeoutId: null,
       refs: {},
       progress: 0,
+      draggingIndex: null,
+      dragOverIndex: null,
     };
   },
   mounted() {
@@ -60,16 +71,7 @@ export default {
         (checkedItems.length / this.editableChecklist.length) * 100
       );
     },
-    editItem(index) {
-      clearTimeout(this.timeoutId);
-      this.$nextTick(() => {
-        const input = this.$refs[this.getRef(index)];
-        if (input) {
-          input.focus();
-          input.select();
-        }
-      });
-    },
+
     saveItem(index) {
       if (this.editableChecklist[index].text.trim() === '') {
         this.editableChecklist.splice(index, 1);
@@ -105,6 +107,44 @@ export default {
     getRef(index) {
       return `editInput-${index}`;
     },
+    drag(event, index) {
+      this.draggingIndex = index;
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/html', event.target.innerHTML);
+    },
+
+    dragEnter(event, index) {
+      event.preventDefault();
+      this.dragOverIndex = index;
+    },
+
+    dragOver(event, index) {
+      event.preventDefault();
+      this.dragOverIndex = index;
+    },
+
+    dragLeave() {
+      if (this.draggingIndex !== null) {
+        this.dragOverIndex = this.draggingIndex;
+      } else {
+        this.dragOverIndex = null;
+      }
+    },
+
+    allowDrop(event) {
+      event.preventDefault();
+    },
+    drop(event) {
+      event.preventDefault();
+      if (this.draggingIndex !== null && this.dragOverIndex !== null) {
+        const draggedItem = this.editableChecklist[this.draggingIndex];
+        this.editableChecklist.splice(this.draggingIndex, 1);
+        this.editableChecklist.splice(this.dragOverIndex, 0, draggedItem);
+        this.draggingIndex = null;
+        this.dragOverIndex = null;
+        this.saveData();
+      }
+    },
   },
   watch: {
     editableChecklist: {
@@ -121,20 +161,25 @@ export default {
 <style lang="scss" scoped>
 .checklist {
   font-family: Arial, sans-serif;
+
   &__item {
     display: flex;
     align-items: center;
     cursor: pointer;
     padding: 8px;
     border-bottom: 1px solid #ccc;
+    &.is-dragging {
+      opacity: 0.5;
+    }
+
+    &.is-drag-over {
+      border-bottom: 2px solid blue;
+    }
   }
+
   &__item .checklist-checkbox {
     margin-right: 12px;
     flex-shrink: 0;
-  }
-
-  &__item-text {
-    margin-left: 8px;
   }
 
   &__item-input {
@@ -146,6 +191,7 @@ export default {
     outline: none;
     background-color: transparent;
     flex-grow: 1;
+
     &:focus {
       background-color: #f5f5f5;
     }
@@ -153,6 +199,9 @@ export default {
 
   &__item-input a-checkbox {
     width: 100%;
+  }
+  &__icon {
+    margin-right: 8px; // Adjust the margin value as per your desired spacing
   }
 }
 
@@ -163,19 +212,5 @@ a-checkbox span.ant-checkbox-inner {
 a-checkbox.ant-checkbox-checked span.ant-checkbox-inner {
   background-color: #0052cc;
   border-color: #0052cc;
-}
-
-a-checkbox.ant-checkbox-disabled {
-  cursor: not-allowed;
-}
-
-a-checkbox.ant-checkbox-disabled span.ant-checkbox-inner {
-  background-color: #eaeaea;
-  border-color: #eaeaea;
-}
-
-a-checkbox.ant-checkbox-disabled + span {
-  color: #bbb;
-  cursor: not-allowed;
 }
 </style>
