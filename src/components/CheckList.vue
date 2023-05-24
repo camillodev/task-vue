@@ -95,8 +95,6 @@ export default {
     },
 
     saveData() {
-      // Simulate saving the data to a service
-      // Replace this with your own implementation
       console.log('Saving data:', this.editableChecklist);
     },
     startTimeout() {
@@ -201,7 +199,7 @@ export default {
     width: 100%;
   }
   &__icon {
-    margin-right: 8px; // Adjust the margin value as per your desired spacing
+    margin-right: 8px;
   }
 }
 
