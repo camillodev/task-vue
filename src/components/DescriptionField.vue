@@ -2,13 +2,13 @@
   <div class="description-field">
     <div class="description">
       <div class="description-text">
-        <h1>{{ description }}</h1>
+        <h1>{{ description.text }}</h1>
       </div>
     </div>
 
     <div class="checklist-wrapper">
       <CheckList
-        :external-checklist-items="checklist"
+        :external-checklist-items="description.checklist"
         :template-data="templates"
         @change="handleChecklistChange" />
     </div>
@@ -17,6 +17,7 @@
 
 <script>
 import CheckList from './CheckList.vue';
+import DescriptionService from '../services/DescriptionService';
 
 export default {
   name: 'DescriptionField',
@@ -25,12 +26,14 @@ export default {
   },
   data() {
     return {
-      description: 'This is the description',
-      checklist: [
-        { text: 'Item 1', checked: false },
-        { text: 'Item 2', checked: false },
-        { text: 'Item 3', checked: false },
-      ],
+      description: {
+        text: 'This is the description',
+        checklist: [
+          { text: 'Item 1', checked: false },
+          { text: 'Item 2', checked: false },
+          { text: 'Item 3', checked: false },
+        ],
+      },
       templates: [
         {
           key: 1,
@@ -81,8 +84,8 @@ export default {
   },
   methods: {
     handleChecklistChange(updatedChecklist) {
-      this.checklist = updatedChecklist;
-      console.log('Updated Checklist:', updatedChecklist);
+      this.description.checklist = updatedChecklist;
+      DescriptionService.saveDescription(this.description);
     },
   },
 };
