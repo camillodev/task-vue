@@ -142,14 +142,24 @@ export default {
       this.saveData();
     },
     saveItemAndAddNew(index) {
-      this.saveItem(index);
-      this.editableChecklist.splice(index + 1, 0, { text: '', checked: false });
+      const currentItem = this.editableChecklist[index];
+      const cursorPosition = this.$el.querySelectorAll('.checklist-item-input')[
+        index
+      ].selectionStart;
+      const remainingText = currentItem.text.substring(cursorPosition);
+      currentItem.text = currentItem.text.substring(0, cursorPosition).trim();
+
+      this.editableChecklist.splice(index + 1, 0, {
+        text: remainingText,
+        checked: false,
+      });
+
       this.$nextTick(() => {
-        const input = this.$el.querySelectorAll('.checklist-item-input')[
+        const newInput = this.$el.querySelectorAll('.checklist-item-input')[
           index + 1
         ];
-        input?.focus();
-        input?.select();
+        newInput?.focus();
+        newInput?.setSelectionRange(0, 0);
       });
     },
 
