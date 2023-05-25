@@ -7,7 +7,7 @@
           v-for="item in templates"
           :key="item.key"
           :value="item.key"
-          @click="handleChange(item)">
+          @click="selectTemplate(item)">
           {{ item.value }}
         </a-select-option>
       </a-select>
@@ -36,7 +36,7 @@
         type="text"
         class="checklist-item-input"
         v-model="editableChecklist[index].text"
-        :ref="getRef(index)"
+        :ref="`input-${index}`"
         @blur="saveItem(index)"
         @keyup.enter="saveItemAndAddNew(index)" />
     </div>
@@ -109,26 +109,23 @@ export default {
               checked: false,
               text: 'Perform code quality checks',
             },
-            // Add more build steps as needed
           ],
         },
       ],
     };
   },
   created() {
-    this.initEditableChecklist();
+    this.editableChecklist = this.checklist;
     this.selectedTemplate = this.templates[0];
   },
   methods: {
-    handleChange(template) {
+    selectTemplate(template) {
       console.log('template', template);
 
       this.editableChecklist = [...this.editableChecklist, ...template.items];
       this.selectedTemplate = this.templates[0];
     },
-    initEditableChecklist() {
-      this.editableChecklist = this.checklist;
-    },
+
     updateProgress() {
       const checkedItems = this.editableChecklist.filter(
         (item) => item.checked
@@ -151,12 +148,8 @@ export default {
         const input = this.$el.querySelectorAll('.checklist-item-input')[
           index + 1
         ];
-        if (input) {
-          this.$nextTick(() => {
-            input.focus();
-            input.select();
-          });
-        }
+        input?.focus();
+        input?.select();
       });
     },
 
@@ -168,9 +161,7 @@ export default {
         this.saveData();
       }, 3000);
     },
-    getRef(index) {
-      return `editInput-${index}`;
-    },
+
     drag(event, index) {
       this.draggingIndex = index;
       event.dataTransfer.effectAllowed = 'move';
