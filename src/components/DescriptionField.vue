@@ -7,7 +7,10 @@
     </div>
 
     <div class="checklist-wrapper">
-      <CheckList :checklist="checklist" />
+      <CheckList
+        :external-checklist-items="checklist"
+        :template-data="templates"
+        @change="handleChecklistChange" />
     </div>
   </div>
 </template>
@@ -28,7 +31,59 @@ export default {
         { text: 'Item 2', checked: false },
         { text: 'Item 3', checked: false },
       ],
+      templates: [
+        {
+          key: 1,
+          value: 'Definition of Done',
+          items: [
+            {
+              checked: false,
+              text: 'All acceptance criteria are met',
+            },
+            {
+              checked: false,
+              text: 'Code is reviewed and approved',
+            },
+            {
+              checked: false,
+              text: 'Unit tests are passing',
+            },
+          ],
+        },
+        {
+          key: 2,
+          value: 'Build Steps',
+          items: [
+            {
+              checked: false,
+              text: 'Pull latest code from the repository',
+            },
+            {
+              checked: false,
+              text: 'Install dependencies',
+            },
+            {
+              checked: false,
+              text: 'Run build scripts',
+            },
+            {
+              checked: false,
+              text: 'Generate build artifacts',
+            },
+            {
+              checked: false,
+              text: 'Perform code quality checks',
+            },
+          ],
+        },
+      ],
     };
+  },
+  methods: {
+    handleChecklistChange(updatedChecklist) {
+      this.checklist = updatedChecklist;
+      console.log('Updated Checklist:', updatedChecklist);
+    },
   },
 };
 </script>

@@ -14,7 +14,7 @@
       <a-button type="primary">Save as Template</a-button>
     </div>
     <div
-      v-for="(_, index) in editableChecklist"
+      v-for="(item, index) in internalChecklistItems"
       :key="index"
       class="checklist-item"
       :class="{
@@ -29,11 +29,11 @@
       @drop="drop($event)"
       @dragend="dragLeave">
       <a-icon type="menu" />
-      <a-checkbox v-model="editableChecklist[index].checked"></a-checkbox>
+      <a-checkbox v-model="item.checked"></a-checkbox>
       <input
         type="text"
         class="checklist-item-input"
-        v-model="editableChecklist[index].text"
+        v-model="item.text"
         :ref="`input-${index}`"
         @blur="saveItem(index)"
         @keyup.enter="saveItemAndAddNew(index)" />
@@ -45,109 +45,77 @@
 export default {
   name: 'CheckList',
   props: {
-    checklist: {
+    externalChecklistItems: {
+      type: Array,
+      required: true,
+    },
+    templateData: {
       type: Array,
       required: true,
     },
   },
   data() {
     return {
-      editableChecklist: [],
-      timeoutId: null,
-      refs: {},
+      internalChecklistItems: [
+        {
+          text: '',
+          checked: false,
+        },
+      ],
+      debounceTimeout: null,
       progress: 0,
       draggingIndex: null,
       dragOverIndex: null,
-
-      selectedTemplate: null,
+      selectedTemplate: {
+        key: 0,
+        value: 'Select Template',
+      },
       templates: [
         {
           key: 0,
           value: 'Select Template',
-        },
-        {
-          key: 1,
-          value: 'Definition of Done',
-          items: [
-            {
-              checked: false,
-              text: 'All acceptance criteria are met',
-            },
-            {
-              checked: false,
-              text: 'Code is reviewed and approved',
-            },
-            {
-              checked: false,
-              text: 'Unit tests are passing',
-            },
-          ],
-        },
-        {
-          key: 2,
-          value: 'Build Steps',
-          items: [
-            {
-              checked: false,
-              text: 'Pull latest code from the repository',
-            },
-            {
-              checked: false,
-              text: 'Install dependencies',
-            },
-            {
-              checked: false,
-              text: 'Run build scripts',
-            },
-            {
-              checked: false,
-              text: 'Generate build artifacts',
-            },
-            {
-              checked: false,
-              text: 'Perform code quality checks',
-            },
-          ],
         },
       ],
     };
   },
   created() {
     this.editableChecklist = this.checklist;
-    this.selectedTemplate = this.templates[0];
+    this.internalChecklistItems = this.externalChecklistItems;
+    this.templates.push(...this.templateData);
   },
   computed: {
     progressPercentage() {
-      const checkedItems = this.editableChecklist.filter(
+      const checkedItems = this.internalChecklistItems.filter(
         (item) => item.checked
       );
       return Math.floor(
-        (checkedItems.length / this.editableChecklist.length) * 100
+        (checkedItems.length / this.internalChecklistItems.length) * 100
       );
     },
   },
   methods: {
     selectTemplate(template) {
       const { items } = template;
-      this.editableChecklist.push(...items);
+      this.internalChecklistItems.push(...items);
       this.selectedTemplate = this.templates[0];
+      this.emitChangesWithDelay();
     },
 
     saveItem(index) {
-      if (this.editableChecklist[index].text.trim() === '') {
-        this.editableChecklist.splice(index, 1);
+      if (this.internalChecklistItems[index].text.trim() === '') {
+        this.internalChecklistItems.splice(index, 1);
       }
-      this.saveData();
+      this.emitChangesWithDelay();
     },
     saveItemAndAddNew(index) {
-      const currentItem = this.editableChecklist[index];
+      const currentItem = this.internalChecklistItems[index];
       const cursorPosition = this.$el.querySelectorAll('.checklist-item-input')[
         index
       ].selectionStart;
       const remainingText = currentItem.text.substring(cursorPosition);
       currentItem.text = currentItem.text.substring(0, cursorPosition).trim();
 
-      this.editableChecklist.splice(index + 1, 0, {
+      this.internalChecklistItems.splice(index + 1, 0, {
         text: remainingText,
         checked: false,
       });
@@ -159,14 +127,14 @@ export default {
         newInput?.focus();
         newInput?.setSelectionRange(0, 0);
       });
+
+      this.emitChangesWithDelay();
     },
 
-    saveData() {
-      console.log('Saving data:', this.editableChecklist);
-    },
-    startTimeout() {
-      this.timeoutId = setTimeout(() => {
-        this.saveData();
+    emitChangesWithDelay() {
+      clearTimeout(this.debounceTimeout);
+      this.debounceTimeout = setTimeout(() => {
+        this.$emit('change', this.internalChecklistItems);
       }, 3000);
     },
 
@@ -200,22 +168,13 @@ export default {
     drop(event) {
       event.preventDefault();
       if (this.draggingIndex !== null && this.dragOverIndex !== null) {
-        const draggedItem = this.editableChecklist[this.draggingIndex];
-        this.editableChecklist.splice(this.draggingIndex, 1);
-        this.editableChecklist.splice(this.dragOverIndex, 0, draggedItem);
+        const draggedItem = this.internalChecklistItems[this.draggingIndex];
+        this.internalChecklistItems.splice(this.draggingIndex, 1);
+        this.internalChecklistItems.splice(this.dragOverIndex, 0, draggedItem);
         this.draggingIndex = null;
         this.dragOverIndex = null;
-        this.saveData();
+        this.emitChangesWithDelay();
       }
-    },
-  },
-  watch: {
-    editableChecklist: {
-      handler() {
-        clearTimeout(this.timeoutId);
-        this.startTimeout();
-      },
-      deep: true,
     },
   },
 };
