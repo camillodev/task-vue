@@ -1,7 +1,7 @@
 <template>
   <div class="checklist">
     <div class="checklist-header">
-      <a-progress :percent="progress" />
+      <a-progress :percent="progressPercentage" />
       <a-select label-in-value :default-value="selectedTemplate">
         <a-select-option
           v-for="item in templates"
@@ -29,9 +29,7 @@
       @drop="drop($event)"
       @dragend="dragLeave">
       <a-icon type="menu" />
-      <a-checkbox
-        v-model="editableChecklist[index].checked"
-        @change="updateProgress"></a-checkbox>
+      <a-checkbox v-model="editableChecklist[index].checked"></a-checkbox>
       <input
         type="text"
         class="checklist-item-input"
@@ -118,21 +116,21 @@ export default {
     this.editableChecklist = this.checklist;
     this.selectedTemplate = this.templates[0];
   },
-  methods: {
-    selectTemplate(template) {
-      console.log('template', template);
-
-      this.editableChecklist = [...this.editableChecklist, ...template.items];
-      this.selectedTemplate = this.templates[0];
-    },
-
-    updateProgress() {
+  computed: {
+    progressPercentage() {
       const checkedItems = this.editableChecklist.filter(
         (item) => item.checked
       );
-      this.progress = Math.floor(
+      return Math.floor(
         (checkedItems.length / this.editableChecklist.length) * 100
       );
+    },
+  },
+  methods: {
+    selectTemplate(template) {
+      const { items } = template;
+      this.editableChecklist.push(...items);
+      this.selectedTemplate = this.templates[0];
     },
 
     saveItem(index) {
