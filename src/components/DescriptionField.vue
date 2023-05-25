@@ -1,7 +1,7 @@
 <template>
   <div class="description-field">
-    <div class="description" @click="focusInput">
-      <div class="description-text" v-if="!editing" @click="startEditing">
+    <div class="description">
+      <div class="description-text">
         <h1>{{ description }}</h1>
       </div>
     </div>
@@ -23,29 +23,12 @@ export default {
   data() {
     return {
       description: 'This is the description',
-      editing: false,
       checklist: [
         { text: 'Item 1', checked: false },
         { text: 'Item 2', checked: false },
         { text: 'Item 3', checked: false },
       ],
     };
-  },
-  methods: {
-    startEditing() {
-      this.editing = true;
-      this.$nextTick(() => {
-        this.$refs.input.focus();
-      });
-    },
-    finishEditing() {
-      this.editing = false;
-    },
-    focusInput() {
-      if (!this.editing) {
-        this.startEditing();
-      }
-    },
   },
 };
 </script>
