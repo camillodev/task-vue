@@ -12,5 +12,6 @@ module.exports = {
   // Other Jest configurations...
   moduleFileExtensions: ['js', 'json', 'vue'],
 
-  preset: '@vue/cli-plugin-unit-jest'
+  preset: '@vue/cli-plugin-unit-jest',
+  silent: true,
 };
