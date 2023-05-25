@@ -1,11 +1,8 @@
 <template>
   <div class="checklist">
-    <div class="checklist__header">
-      <Progress :percent="progress" />
-      <a-select
-        label-in-value
-        :default-value="selectedTemplate"
-        class="checklist__template-select">
+    <div class="checklist-header">
+      <a-progress :percent="progress" />
+      <a-select label-in-value :default-value="selectedTemplate">
         <a-select-option
           v-for="item in templates"
           :key="item.key"
@@ -19,7 +16,7 @@
     <div
       v-for="(_, index) in editableChecklist"
       :key="index"
-      class="checklist__item"
+      class="checklist-item"
       :class="{
         'is-dragging': draggingIndex === index,
         'is-drag-over': dragOverIndex === index,
@@ -31,14 +28,13 @@
       @dragleave="dragLeave"
       @drop="drop($event)"
       @dragend="dragLeave">
-      <a-icon type="menu" class="checklist__icon" />
+      <a-icon type="menu" />
       <a-checkbox
         v-model="editableChecklist[index].checked"
-        @change="updateProgress"
-        class="checklist-checkbox"></a-checkbox>
+        @change="updateProgress"></a-checkbox>
       <input
         type="text"
-        class="checklist__item-input"
+        class="checklist-item-input"
         v-model="editableChecklist[index].text"
         :ref="getRef(index)"
         @blur="saveItem(index)"
@@ -48,13 +44,8 @@
 </template>
 
 <script>
-import { Progress } from 'ant-design-vue';
-
 export default {
   name: 'CheckList',
-  components: {
-    Progress,
-  },
   props: {
     checklist: {
       type: Array,
@@ -157,7 +148,7 @@ export default {
       this.saveItem(index);
       this.editableChecklist.splice(index + 1, 0, { text: '', checked: false });
       this.$nextTick(() => {
-        const input = this.$el.querySelectorAll('.checklist__item-input')[
+        const input = this.$el.querySelectorAll('.checklist-item-input')[
           index + 1
         ];
         if (input) {
@@ -234,14 +225,12 @@ export default {
 <style lang="scss" scoped>
 .checklist {
   font-family: Arial, sans-serif;
-  &__header {
+
+  &-header {
     display: flex;
   }
-  &__template-select {
-    width: 200px;
-    margin: 0 15px;
-  }
-  &__item {
+
+  &-item {
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -257,12 +246,7 @@ export default {
     }
   }
 
-  &__item .checklist-checkbox {
-    margin-right: 12px;
-    flex-shrink: 0;
-  }
-
-  &__item-input {
+  &-item-input {
     border: none;
     font-size: 14px;
     line-height: 1.5;
@@ -276,16 +260,11 @@ export default {
       background-color: #f5f5f5;
     }
   }
-
-  &__item-input a-checkbox {
-    width: 100%;
-  }
-
-  &__icon {
-    margin-right: 8px;
-  }
 }
 
+.anticon {
+  margin-right: 8px;
+}
 a-checkbox span.ant-checkbox-inner {
   border-radius: 2px;
 }
