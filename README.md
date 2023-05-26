@@ -1,5 +1,8 @@
 # ui-quantify
 
+## live version of the code here
+https://quantify-ui-library.vercel.app
+
 ## Project setup
 ```
 yarn install
