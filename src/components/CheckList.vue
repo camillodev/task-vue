@@ -29,7 +29,9 @@
       @drop="drop($event)"
       @dragend="dragLeave">
       <a-icon type="menu" />
-      <a-checkbox v-model="item.checked"></a-checkbox>
+      <a-checkbox
+        v-model="item.checked"
+        :data-testid="`checkbox-${index}`"></a-checkbox>
       <input
         type="text"
         class="checklist-item-input"
@@ -79,8 +81,7 @@ export default {
     };
   },
   created() {
-    this.editableChecklist = this.checklist;
-    this.internalChecklistItems = this.externalChecklistItems;
+    this.internalChecklistItems = this.externalChecklistItems.slice(); // clone array
     this.templates.push(...this.templateData);
   },
   computed: {
