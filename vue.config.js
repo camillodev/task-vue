@@ -11,9 +11,31 @@ module.exports = {
       },
     },
   },
-  transpileDependencies: true,
+  runtimeCompiler: true,
 
-  chainWebpack: (config) => {
-    config.resolve.alias.set('@', path.resolve(__dirname, 'src'));
+  configureWebpack: {
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, 'src'),
+      },
+    },
+    module: {
+      rules: [
+        {
+          test: /\.vue$/,
+          use: 'vue-loader',
+        },
+        {
+          test: /\.ts$/,
+          exclude: /node_modules/,
+          use: {
+            loader: 'ts-loader',
+            options: {
+              appendTsSuffixTo: [/\.vue$/],
+            },
+          },
+        },
+      ],
+    },
   },
 };
