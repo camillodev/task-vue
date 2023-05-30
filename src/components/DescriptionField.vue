@@ -8,8 +8,8 @@
 
     <div class="checklist-wrapper">
       <CheckList
-        :external-checklist-items="description.checklist"
-        :template-data="templates"
+        :list-items="description.checklist"
+        :templates="templates"
         @change="handleChecklistChange" />
     </div>
   </div>

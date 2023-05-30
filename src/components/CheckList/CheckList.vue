@@ -6,7 +6,7 @@
         <a-menu slot="overlay">
           <a-menu-item
             v-for="item in templates"
-            :key="item.key"
+            :key="item.id"
             @click="selectTemplate(item)">
             {{ item.value }}
           </a-menu-item>
@@ -23,66 +23,49 @@
         </a-button>
       </a-dropdown>
     </div>
-    <List :items="externalChecklistItems" @save="saveList" />
+    <List :items="items" @save="saveList" />
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { CheckListItem, Template } from '../../interfaces';
 import List from './List.vue';
+
 export default {
   name: 'CheckList',
   components: {
     List,
   },
   props: {
-    externalChecklistItems: {
-      type: Array,
+    listItems: {
+      type: Array as () => CheckListItem[],
       required: true,
     },
-    templateData: {
-      type: Array,
+    templates: {
+      type: Array as () => Template[],
       required: true,
     },
   },
   data() {
     return {
       progress: 0,
-
-      selectedTemplate: {
-        key: 0,
-        value: 'Select Template',
-      },
-      templates: [
-        {
-          key: 0,
-          value: 'Select Template',
-        },
-      ],
+      items: [...this.listItems] as CheckListItem[],
     };
   },
-  created() {
-    this.templates = this.templateData;
-  },
+  created() {},
   computed: {
     progressPercentage() {
-      const checkedItems = this.externalChecklistItems.filter(
-        (item) => item.checked
-      );
-      return Math.floor(
-        (checkedItems.length / this.externalChecklistItems.length) * 100
-      );
+      const checkedItems = this.items.filter((item) => item.checked);
+      return Math.floor((checkedItems.length / this.items.length) * 100);
     },
   },
   methods: {
-    selectTemplate(template) {
-      // const { items } = template;
-      // this.internalChecklistItems.push(...items);
+    selectTemplate(template: Template) {
       console.log(template);
-      this.selectedTemplate = this.templates[0];
-      // this.emitChangesWithDelay();
+      this.items.push(...template.items);
     },
 
-    saveList(items) {
+    saveList(items: CheckListItem[]) {
       console.log('save to pinia', items);
     },
   },

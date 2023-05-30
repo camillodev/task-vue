@@ -2,23 +2,17 @@
   "compilerOptions": {
     "target": "es5",
     "module": "esnext",
-    "strict": false,
+    "strict": true,
     "jsx": "preserve",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
+    "allowJs": true,
     "isolatedModules": true,
     "noImplicitAny": false,
     "noImplicitThis": false
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.vue",
-    "src/**/*.tsx",
-    "tests/**/*.ts",
-    "tests/**/*.tsx",
-    "typings/**/*.d.ts"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.vue"],
   "exclude": ["node_modules"]
 }
