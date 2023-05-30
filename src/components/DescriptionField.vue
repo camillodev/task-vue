@@ -16,8 +16,8 @@
 </template>
 
 <script>
-import CheckList from './CheckList.vue';
 import DescriptionService from '../services/DescriptionService';
+import CheckList from '@/components/CheckList/CheckList.vue';
 
 export default {
   name: 'DescriptionField',
