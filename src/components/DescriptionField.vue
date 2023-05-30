@@ -93,8 +93,6 @@ export default {
 
 <style>
 .description-field {
-  background-color: #f6f8fa;
-  border: 1px solid #dfe1e6;
   border-radius: 4px;
   padding: 12px;
   font-family: Arial, sans-serif;
