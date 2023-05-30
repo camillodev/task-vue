@@ -23,7 +23,7 @@
         </a-button>
       </a-dropdown>
     </div>
-    <List :items="externalChecklistItems" />
+    <List :items="externalChecklistItems" @save="saveList" />
   </div>
 </template>
 
@@ -82,11 +82,8 @@ export default {
       // this.emitChangesWithDelay();
     },
 
-    saveItem(index) {
-      if (this.internalChecklistItems[index].text.trim() === '') {
-        this.internalChecklistItems.splice(index, 1);
-      }
-      this.emitChangesWithDelay();
+    saveList(items) {
+      console.log('save to pinia', items);
     },
   },
 };

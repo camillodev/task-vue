@@ -18,13 +18,15 @@
       <a-icon type="menu" />
       <a-checkbox
         v-model="item.checked"
+        @click="emitSave()"
         :data-testid="`checkbox-${index}`"></a-checkbox>
       <input
         type="text"
         class="checklist-item-input"
         v-model="item.text"
         :ref="`input-${index}`"
-        @blur="saveItem(index)"
+        @input="emitSave()"
+        @blur="$emit('save', internalItems)"
         @keyup.enter="saveItemAndAddNew(index)" />
     </div>
   </div>
@@ -63,7 +65,7 @@ export default {
       if (this.internalItems[index].text.trim() === '') {
         this.internalItems.splice(index, 1);
       }
-      this.emitChangesWithDelay();
+      this.emitSave();
     },
     saveItemAndAddNew(index) {
       const currentItem = this.internalItems[index];
@@ -86,11 +88,14 @@ export default {
         newInput?.setSelectionRange(0, 0);
       });
 
-      this.emitChangesWithDelay();
+      this.emitSave();
     },
 
-    emitChangesWithDelay() {
-      console.log('save with pinia');
+    emitSave() {
+      clearTimeout(this.debounceTimeout);
+      this.debounceTimeout = setTimeout(() => {
+        this.$emit('save', this.internalItems);
+      }, 3000);
     },
 
     drag(event, index) {
@@ -128,7 +133,7 @@ export default {
         this.internalItems.splice(this.dragOverIndex, 0, draggedItem);
         this.draggingIndex = null;
         this.dragOverIndex = null;
-        this.emitChangesWithDelay();
+        this.emitSave();
       }
     },
   },
