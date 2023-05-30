@@ -11,9 +11,22 @@ module.exports = {
       },
     },
   },
-  transpileDependencies: true,
+  transpileDependencies: ['vue', 'vuex', 'vue-router'],
 
   chainWebpack: (config) => {
     config.resolve.alias.set('@', path.resolve(__dirname, 'src'));
+
+    config.resolve.extensions.add('.ts').add('.vue').add('.js');
+
+    config.entry('app').clear().add('./src/main.ts');
+
+    config.module
+      .rule('ts')
+      .test(/\.ts$/)
+      .use('ts-loader')
+      .loader('ts-loader')
+      .options({
+        appendTsSuffixTo: [/\.vue$/],
+      });
   },
 };
