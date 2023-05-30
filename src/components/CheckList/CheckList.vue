@@ -32,7 +32,7 @@ import { CheckListItem, Template } from '../../interfaces';
 import List from './List.vue';
 
 export default {
-  name: 'CheckList',
+  name: 'CheckListComponent',
   components: {
     List,
   },

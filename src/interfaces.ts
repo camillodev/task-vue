@@ -8,7 +8,7 @@ export interface CheckListItem {
 export interface CheckList {
   id: string;
   updatedAt: string;
-  checklist: CheckListItem[];
+  items: CheckListItem[];
 }
 
 export interface Template {
