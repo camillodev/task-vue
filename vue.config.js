@@ -1,5 +1,3 @@
-const path = require('path');
-
 module.exports = {
   css: {
     loaderOptions: {
@@ -14,8 +12,6 @@ module.exports = {
   transpileDependencies: ['vue', 'vuex', 'vue-router'],
 
   chainWebpack: (config) => {
-    config.resolve.alias.set('@', path.resolve(__dirname, 'src'));
-
     config.resolve.extensions.add('.ts').add('.vue').add('.js');
 
     config.entry('app').clear().add('./src/main.ts');

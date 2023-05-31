@@ -32,12 +32,14 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { CheckListItem } from '../../interfaces';
+
 export default {
   name: 'ListComponent',
   props: {
     items: {
-      type: Array,
+      type: Array as () => CheckListItem[],
       required: true,
     },
   },

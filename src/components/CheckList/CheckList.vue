@@ -30,6 +30,8 @@
 <script lang="ts">
 import { CheckListItem, Template } from '../../interfaces';
 import List from './List.vue';
+import { mapActions, mapState } from 'pinia';
+import { useTemplateStore } from './store';
 
 export default {
   name: 'CheckListComponent',
@@ -41,10 +43,6 @@ export default {
       type: Array as () => CheckListItem[],
       required: true,
     },
-    templates: {
-      type: Array as () => Template[],
-      required: true,
-    },
   },
   data() {
     return {
@@ -52,14 +50,20 @@ export default {
       items: [...this.listItems] as CheckListItem[],
     };
   },
-  created() {},
+  created() {
+    this.fetchTemplates();
+  },
   computed: {
+    ...mapState(useTemplateStore, ['templates']),
+
     progressPercentage() {
       const checkedItems = this.items.filter((item) => item.checked);
+      console.log(this.templates);
       return Math.floor((checkedItems.length / this.items.length) * 100);
     },
   },
   methods: {
+    ...mapActions(useTemplateStore, ['fetchTemplates']),
     selectTemplate(template: Template) {
       console.log(template);
       this.items.push(...template.items);
