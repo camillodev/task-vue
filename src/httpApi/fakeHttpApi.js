@@ -46,12 +46,16 @@ class FakeHttpApi {
   }
 
   getCheckList({ id }) {
-    const checklist = this._checklists.find((checklist) => checklist.id === id);
+    const storedChecklists = JSON.parse(
+      localStorage.getItem('checklists') || '[]'
+    );
+    const checklist = storedChecklists.find((checklist) => checklist.id === id);
 
-    if (!checklist)
+    if (!checklist) {
       return this.fakeResponse({
         status: _404_NOT_FOUND,
       });
+    }
 
     return this.fakeResponse({
       status: _200_OK,
@@ -66,7 +70,6 @@ class FakeHttpApi {
       id: uuidv4(),
       updatedAt: new Date().toISOString(),
     };
-    console.log('newChecklist x', JSON.stringify(newChecklist));
 
     this._checklists.push(newChecklist);
 

@@ -1,14 +1,13 @@
 <template>
   <div class="description-field">
     <div class="checklist-wrapper">
-      <CheckListComponent />
+      <CheckListComponent v-if="checklistId" :checklist-id="checklistId" />
+      <CheckListComponent v-else />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { CheckList, CheckListItem, Template } from './CheckList/interfaces';
-import DescriptionService from '../services/DescriptionService';
 import CheckListComponent from '@/components/CheckList/CheckList.vue';
 
 export default {
@@ -20,6 +19,10 @@ export default {
     return {
       checklistId: null,
     };
+  },
+  created() {
+    const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
+    this.checklistId = checklists.length > 0 ? checklists[0].id : '';
   },
   methods: {},
 };

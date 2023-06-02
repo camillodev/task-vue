@@ -79,7 +79,6 @@ export const useCheckListStore = defineStore('checklistStore', {
   actions: {
     async getCheckList(id: string) {
       try {
-        console.log('Fetching checklist with id:', id);
         const { data } = await httpApi.getCheckList({ id });
         this.checklist = data;
       } catch (error) {
@@ -93,7 +92,6 @@ export const useCheckListStore = defineStore('checklistStore', {
           checklist,
         });
         this.checklist = data;
-        console.log('final items:', JSON.stringify(data.items));
       } catch (error) {
         console.error('An error occurred while updating the checklist:', error);
       }

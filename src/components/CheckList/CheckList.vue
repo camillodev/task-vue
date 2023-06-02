@@ -24,7 +24,7 @@
         </a-button>
       </a-dropdown>
     </div>
-    <List :items="checklist.items" @save="saveList" />
+    <List :items="checklistItems" @save="saveList" />
   </div>
 </template>
 
@@ -66,14 +66,15 @@ export default {
   computed: {
     ...mapState(useTemplateStore, ['templates']),
     ...mapState(useCheckListStore, ['checklist']),
+    checklistItems() {
+      return this.checklist
+        ? this.checklist.items.map((item) => ({ ...item }))
+        : [];
+    },
     progressPercentage() {
-      if (!this.checklist || !this.checklist.length) {
-        return 0;
-      }
-
-      const checkedItems = this.checklist.items.filter((item) => item.checked);
+      const checkedItems = this.checklistItems.filter((item) => item.checked);
       return Math.floor(
-        (checkedItems.length / this.checklist.items.length) * 100
+        (checkedItems.length / this.checklistItems.length) * 100
       );
     },
   },
@@ -94,8 +95,7 @@ export default {
       this.$destroy();
     },
     saveList(items: CheckListItem[]) {
-      this.checklist.items = items;
-      this.updateCheckList(this.checklist);
+      this.updateCheckList({ ...this.checklist, items });
     },
   },
 };
