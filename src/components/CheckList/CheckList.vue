@@ -17,7 +17,9 @@
         <a-menu slot="overlay">
           <a-menu-item> Save as Template </a-menu-item>
           <a-menu-item> Manage Templates </a-menu-item>
-          <a-menu-item @click="deleteCheckList"> Delete Checklist </a-menu-item>
+          <a-menu-item @click="onDeleteCheckList">
+            Delete Checklist
+          </a-menu-item>
         </a-menu>
         <a-button>
           <a-icon type="ellipsis" />
@@ -52,15 +54,11 @@ export default {
   },
   created() {
     this.fetchTemplates();
+    console.log('checklistId', this.checklistId);
     if (this.checklistId) {
       this.getCheckList(this.checklistId);
     } else {
-      const newChecklist: CheckList = {
-        id: '',
-        updatedAt: Date.now().toString(),
-        items: [],
-      };
-      this.createCheckList(newChecklist);
+      this.createCheckList();
     }
   },
   computed: {
@@ -90,9 +88,8 @@ export default {
       this.checklist.items.push(...template.items);
       this.saveList(this.checklist.items);
     },
-    deleteCheckList() {
+    onDeleteCheckList() {
       this.deleteCheckList(this.checklistId);
-      this.$destroy();
     },
     saveList(items: CheckListItem[]) {
       this.updateCheckList({ ...this.checklist, items });

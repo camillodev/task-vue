@@ -99,13 +99,18 @@ export const useCheckListStore = defineStore('checklistStore', {
     async deleteCheckList(id: string) {
       try {
         await httpApi.deleteCheckList({ id });
-        this.checklist = {} as CheckList;
+        this.createCheckList();
       } catch (error) {
         console.error('An error occurred while deleting the checklist:', error);
       }
     },
-    async createCheckList(checklist: CheckList) {
+    async createCheckList() {
       try {
+        const checklist: CheckList = {
+          id: '',
+          updatedAt: Date.now().toString(),
+          items: [],
+        };
         const { data } = await httpApi.createCheckList({ checklist });
         this.checklist = data;
       } catch (error) {
