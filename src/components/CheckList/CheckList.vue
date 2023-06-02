@@ -15,8 +15,10 @@
       </a-dropdown>
       <a-dropdown>
         <a-menu slot="overlay">
-          <a-menu-item> Save as Template </a-menu-item>
-          <a-menu-item> Manage Templates </a-menu-item>
+          <a-menu-item @click="saveAsTemplate"> Save as Template </a-menu-item>
+          <a-menu-item @click="navigateToTemplateManager">
+            Manage Templates
+          </a-menu-item>
           <a-menu-item @click="onDeleteCheckList">
             Delete Checklist
           </a-menu-item>
@@ -35,6 +37,7 @@ import { CheckList, CheckListItem, Template } from './interfaces';
 import List from './List.vue';
 import { mapActions, mapState } from 'pinia';
 import { useTemplateStore, useCheckListStore } from './store';
+import router from '@/router';
 
 export default {
   name: 'CheckListComponent',
@@ -77,7 +80,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useTemplateStore, ['fetchTemplates']),
+    ...mapActions(useTemplateStore, ['fetchTemplates', 'addTemplate']),
     ...mapActions(useCheckListStore, [
       'getCheckList',
       'createCheckList',
@@ -93,6 +96,18 @@ export default {
     },
     saveList(items: CheckListItem[]) {
       this.updateCheckList({ ...this.checklist, items });
+    },
+    navigateToTemplateManager() {
+      router.push('/template-manager');
+    },
+    saveAsTemplate() {
+      const template = {
+        id: '', // Generate a new ID
+        updatedAt: new Date().toISOString(),
+        value: 'New Template', // Customize the template value as needed
+        items: this.checklistItems,
+      };
+      this.addTemplate(template);
     },
   },
 };

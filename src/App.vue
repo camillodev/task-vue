@@ -1,18 +1,13 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png" />
-    <DescriptionField />
+    <router-view />
   </div>
 </template>
 
 <script>
-import DescriptionField from './components/DescriptionField.vue';
-
 export default {
   name: 'App',
-  components: {
-    DescriptionField,
-  },
 };
 </script>
 
