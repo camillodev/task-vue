@@ -12,7 +12,6 @@ export const useTemplateStore = defineStore('templateStore', {
       try {
         const { data } = await httpApi.getTemplates();
         this.templates = data;
-        this.saveTemplatesToStorage();
       } catch (error) {
         console.error('Failed to fetch templates:', error);
       }
@@ -21,7 +20,6 @@ export const useTemplateStore = defineStore('templateStore', {
       try {
         const { data } = await httpApi.createTemplate({ template });
         this.templates.push(data);
-        this.saveTemplatesToStorage();
       } catch (error) {
         console.error('Failed to add template:', error);
       }
@@ -37,7 +35,6 @@ export const useTemplateStore = defineStore('templateStore', {
         );
         if (index !== -1) {
           this.templates.splice(index, 1, data);
-          this.saveTemplatesToStorage();
         }
       } catch (error) {
         console.error('Failed to update template:', error);
@@ -51,18 +48,9 @@ export const useTemplateStore = defineStore('templateStore', {
         );
         if (index !== -1) {
           this.templates.splice(index, 1);
-          this.saveTemplatesToStorage();
         }
       } catch (error) {
         console.error('Failed to delete template:', error);
-      }
-    },
-    saveTemplatesToStorage() {
-      try {
-        // Save the templates to local storage
-        localStorage.setItem('templateStore', JSON.stringify(this.templates));
-      } catch (error) {
-        console.error('Failed to save templates to local storage:', error);
       }
     },
   },
