@@ -1,108 +1,210 @@
 import {
   _200_OK,
   _404_NOT_FOUND,
-  _429_TOO_MANY_REQUESTS,
   is4xxClientError,
   is5xxServerError,
 } from './httpStatus';
+import { v4 as uuidv4 } from 'uuid';
 
-const mockTemplates = require('./templates.json');
-
-const SEARCH_REQUEST_MIN_INTERVAL_IN_MILLIS = 300;
-
-const fakeResponse = ({ status, data, maxLatencyInMillis }) => {
-  const latency = Math.round(Math.random() * maxLatencyInMillis);
-
-  return new Promise((resolve, reject) =>
-    setTimeout(
-      () =>
-        is4xxClientError(status) || is5xxServerError(status)
-          ? reject({ status, data })
-          : resolve({ status, data }),
-      latency
-    )
-  );
-};
-
-class IntervalCheck {
-  passedLessThan = (minInterval) => {
-    const now = new Date();
-    const differenceInMilliseconds = Math.abs(now - this.previousNow);
-    this.previousNow = now;
-    return differenceInMilliseconds < minInterval;
-  };
-}
+import mockTemplates from './templates.json';
 
 class FakeHttpApi {
   constructor() {
-    this._templates = mockTemplates;
-    this._intervalCheck = new IntervalCheck();
-    this.getFirst5MatchingTemplates =
-      this.getFirst5MatchingTemplates.bind(this);
+    const storedChecklists = localStorage.getItem('checklists');
+    const storedTemplates = localStorage.getItem('templates');
+
+    this._checklists = storedChecklists ? JSON.parse(storedChecklists) : [];
+    this._templates = storedTemplates
+      ? JSON.parse(storedTemplates)
+      : mockTemplates;
+
+    this.getCheckList = this.getCheckList.bind(this);
+    this.createCheckList = this.createCheckList.bind(this);
+    this.updateCheckList = this.updateCheckList.bind(this);
+    this.deleteCheckList = this.deleteCheckList.bind(this);
+
     this.getTemplates = this.getTemplates.bind(this);
-    this.getTemplateById = this.getTemplateById.bind(this);
+    this.getTemplate = this.getTemplate.bind(this);
+    this.createTemplate = this.createTemplate.bind(this);
+    this.updateTemplate = this.updateTemplate.bind(this);
+    this.deleteTemplate = this.deleteTemplate.bind(this);
+
+    this.fakeResponse = this.fakeResponse.bind(this);
+  }
+  fakeResponse({ status, data, maxLatencyInMillis }) {
+    const latency = Math.round(Math.random() * maxLatencyInMillis);
+
+    return new Promise((resolve, reject) =>
+      setTimeout(
+        () =>
+          is4xxClientError(status) || is5xxServerError(status)
+            ? reject({ status, data })
+            : resolve({ status, data }),
+        latency
+      )
+    );
   }
 
-  getFirst5MatchingTemplates({ namePart }) {
-    if (
-      this._intervalCheck.passedLessThan(SEARCH_REQUEST_MIN_INTERVAL_IN_MILLIS)
-    ) {
-      return fakeResponse({
-        status: _429_TOO_MANY_REQUESTS,
-        maxLatencyInMillis: 100,
+  getCheckList({ id }) {
+    const checklist = this._checklists.find((checklist) => checklist.id === id);
+
+    if (!checklist)
+      return this.fakeResponse({
+        status: _404_NOT_FOUND,
       });
-    }
 
-    const normalizedNamePart = (namePart || '')
-      .toLowerCase()
-      .trim()
-      .replace(/\s\s+/g, ' ');
-
-    const matchingTemplates = !!normalizedNamePart
-      ? this._templates.filter((template) =>
-          template.name.toLowerCase().includes(normalizedNamePart)
-        )
-      : [];
-
-    return fakeResponse({
+    return this.fakeResponse({
       status: _200_OK,
-      maxLatencyInMillis: 250,
-      data: matchingTemplates.slice(0, 5),
+      maxLatencyInMillis: 500,
+      data: checklist,
+    });
+  }
+
+  createCheckList({ checklist }) {
+    const newChecklist = {
+      ...checklist,
+      id: uuidv4(),
+      updatedAt: new Date().toISOString(),
+    };
+    console.log('newChecklist x', JSON.stringify(newChecklist));
+
+    this._checklists.push(newChecklist);
+
+    localStorage.setItem('checklists', JSON.stringify(this._checklists));
+
+    return this.fakeResponse({
+      status: _200_OK,
+      maxLatencyInMillis: 500,
+      data: newChecklist,
+    });
+  }
+
+  updateCheckList({ id, checklist }) {
+    const index = this._checklists.findIndex(
+      (checklist) => checklist.id === id
+    );
+
+    if (index === -1)
+      return this.fakeResponse({
+        status: _404_NOT_FOUND,
+      });
+
+    this._checklists[index] = {
+      ...this._checklists[index],
+      ...checklist,
+      updatedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem('checklists', JSON.stringify(this._checklists));
+
+    return this.fakeResponse({
+      status: _200_OK,
+      maxLatencyInMillis: 500,
+      data: this._checklists[index],
+    });
+  }
+
+  deleteCheckList({ id }) {
+    const index = this._checklists.findIndex(
+      (checklist) => checklist.id === id
+    );
+
+    if (index === -1)
+      return this.fakeResponse({
+        status: _404_NOT_FOUND,
+      });
+
+    this._checklists.splice(index, 1);
+
+    localStorage.setItem('checklists', JSON.stringify(this._checklists));
+
+    return this.fakeResponse({
+      status: _200_OK,
+      maxLatencyInMillis: 500,
     });
   }
 
   getTemplates() {
-    const template = this._templates;
+    return this.fakeResponse({
+      status: _200_OK,
+      maxLatencyInMillis: 500,
+      data: this._templates,
+    });
+  }
+
+  getTemplate({ id }) {
+    const template = this._templates.find((template) => template.id === id);
 
     if (!template)
-      return fakeResponse({
+      return this.fakeResponse({
         status: _404_NOT_FOUND,
       });
 
-    return fakeResponse({
+    return this.fakeResponse({
       status: _200_OK,
       maxLatencyInMillis: 500,
       data: template,
     });
   }
 
-  getTemplateById({ templateId: templateId }) {
-    const template = this._templates.find(
-      (template) => template.id === templateId
-    );
+  createTemplate({ template }) {
+    const newTemplate = {
+      id: uuidv4(),
+      updatedAt: new Date().toISOString(),
+      ...template,
+    };
 
-    if (!template)
-      return fakeResponse({
+    this._templates.push(newTemplate);
+
+    localStorage.setItem('templates', JSON.stringify(this._templates));
+
+    return this.fakeResponse({
+      status: _200_OK,
+      maxLatencyInMillis: 500,
+      data: newTemplate,
+    });
+  }
+
+  updateTemplate({ id, template }) {
+    const index = this._templates.findIndex((template) => template.id === id);
+
+    if (index === -1)
+      return this.fakeResponse({
         status: _404_NOT_FOUND,
       });
 
-    return fakeResponse({
+    this._templates[index] = {
+      ...this._templates[index],
+      ...template,
+      updatedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem('templates', JSON.stringify(this._templates));
+
+    return this.fakeResponse({
       status: _200_OK,
       maxLatencyInMillis: 500,
-      data: template,
+      data: this._templates[index],
+    });
+  }
+
+  deleteTemplate({ id }) {
+    const index = this._templates.findIndex((template) => template.id === id);
+
+    if (index === -1)
+      return this.fakeResponse({
+        status: _404_NOT_FOUND,
+      });
+
+    this._templates.splice(index, 1);
+
+    localStorage.setItem('templates', JSON.stringify(this._templates));
+
+    return this.fakeResponse({
+      status: _200_OK,
+      maxLatencyInMillis: 500,
     });
   }
 }
 
 export default FakeHttpApi;
-export { SEARCH_REQUEST_MIN_INTERVAL_IN_MILLIS };

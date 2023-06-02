@@ -2,7 +2,7 @@ export interface CheckListItem {
   id: string;
   text: string;
   checked: boolean;
-  updatedAt: string;
+  updatedAt: Date;
 }
 
 export interface CheckList {

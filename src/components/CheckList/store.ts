@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
-import { Template } from '../../interfaces';
+import { CheckList, CheckListItem, Template } from './interfaces';
 import { FakeHttpApi } from '../../httpApi';
 const httpApi = new FakeHttpApi();
+
 export const useTemplateStore = defineStore('templateStore', {
   state: () => ({
     templates: [] as Template[],
@@ -9,42 +10,42 @@ export const useTemplateStore = defineStore('templateStore', {
   actions: {
     async fetchTemplates() {
       try {
-        httpApi.getTemplates().then(({ data }) => {
-          console.log('----- getTemplates -----', data);
-          this.templates = data;
-          this.saveTemplatesToStorage();
-        });
+        const { data } = await httpApi.getTemplates();
+        this.templates = data;
+        this.saveTemplatesToStorage();
       } catch (error) {
         console.error('Failed to fetch templates:', error);
       }
     },
-    addTemplate(template) {
+    async addTemplate(template) {
       try {
-        // Mock the successful response for adding a template
-        const addedTemplate = { ...template };
-        this.templates.push(addedTemplate);
+        const { data } = await httpApi.createTemplate({ template });
+        this.templates.push(data);
         this.saveTemplatesToStorage();
       } catch (error) {
         console.error('Failed to add template:', error);
       }
     },
-    updateTemplate(updatedTemplate) {
+    async updateTemplate(updatedTemplate) {
       try {
-        // Mock the successful response for updating a template
+        const { data } = await httpApi.updateTemplate({
+          id: updatedTemplate.id,
+          template: updatedTemplate,
+        });
         const index = this.templates.findIndex(
           (template) => template.id === updatedTemplate.id
         );
         if (index !== -1) {
-          this.templates.splice(index, 1, updatedTemplate);
+          this.templates.splice(index, 1, data);
           this.saveTemplatesToStorage();
         }
       } catch (error) {
         console.error('Failed to update template:', error);
       }
     },
-    deleteTemplate(templateId) {
+    async deleteTemplate(templateId) {
       try {
-        // Mock the successful response for deleting a template
+        await httpApi.deleteTemplate({ id: templateId });
         const index = this.templates.findIndex(
           (template) => template.id === templateId
         );
@@ -62,6 +63,55 @@ export const useTemplateStore = defineStore('templateStore', {
         localStorage.setItem('templateStore', JSON.stringify(this.templates));
       } catch (error) {
         console.error('Failed to save templates to local storage:', error);
+      }
+    },
+  },
+});
+
+export const useCheckListStore = defineStore('checklistStore', {
+  state: () => ({
+    checklist: {
+      id: '',
+      updatedAt: Date.now().toString(),
+      items: [],
+    } as CheckList,
+  }),
+  actions: {
+    async getCheckList(id: string) {
+      try {
+        console.log('Fetching checklist with id:', id);
+        const { data } = await httpApi.getCheckList({ id });
+        this.checklist = data;
+      } catch (error) {
+        console.error('An error occurred while fetching the checklist:', error);
+      }
+    },
+    async updateCheckList(checklist: CheckList) {
+      try {
+        const { data } = await httpApi.updateCheckList({
+          id: checklist.id,
+          checklist,
+        });
+        this.checklist = data;
+        console.log('final items:', JSON.stringify(data.items));
+      } catch (error) {
+        console.error('An error occurred while updating the checklist:', error);
+      }
+    },
+    async deleteCheckList(id: string) {
+      try {
+        await httpApi.deleteCheckList({ id });
+        this.checklist = {} as CheckList;
+      } catch (error) {
+        console.error('An error occurred while deleting the checklist:', error);
+      }
+    },
+    async createCheckList(checklist: CheckList) {
+      try {
+        const { data } = await httpApi.createCheckList({ checklist });
+        this.checklist = data;
+      } catch (error) {
+        console.error('An error occurred while creating the checklist:', error);
       }
     },
   },

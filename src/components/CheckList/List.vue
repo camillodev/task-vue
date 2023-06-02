@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import { CheckListItem } from '../../interfaces';
+import { CheckListItem } from './interfaces';
 
 export default {
   name: 'ListComponent',

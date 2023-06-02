@@ -5,10 +5,10 @@
       <a-dropdown>
         <a-menu slot="overlay">
           <a-menu-item
-            v-for="item in templates"
-            :key="item.id"
-            @click="selectTemplate(item)">
-            {{ item.value }}
+            v-for="template in templates"
+            :key="template.id"
+            @click="selectTemplate(template)">
+            {{ template.value }}
           </a-menu-item>
         </a-menu>
         <a-button> Load Template <a-icon type="down" /> </a-button>
@@ -17,21 +17,22 @@
         <a-menu slot="overlay">
           <a-menu-item> Save as Template </a-menu-item>
           <a-menu-item> Manage Templates </a-menu-item>
+          <a-menu-item @click="deleteCheckList"> Delete Checklist </a-menu-item>
         </a-menu>
         <a-button>
           <a-icon type="ellipsis" />
         </a-button>
       </a-dropdown>
     </div>
-    <List :items="items" @save="saveList" />
+    <List :items="checklist.items" @save="saveList" />
   </div>
 </template>
 
 <script lang="ts">
-import { CheckListItem, Template } from '../../interfaces';
+import { CheckList, CheckListItem, Template } from './interfaces';
 import List from './List.vue';
 import { mapActions, mapState } from 'pinia';
-import { useTemplateStore } from './store';
+import { useTemplateStore, useCheckListStore } from './store';
 
 export default {
   name: 'CheckListComponent',
@@ -39,38 +40,62 @@ export default {
     List,
   },
   props: {
-    listItems: {
-      type: Array as () => CheckListItem[],
-      required: true,
+    checklistId: {
+      type: String,
+      required: false,
     },
   },
   data() {
     return {
       progress: 0,
-      items: [...this.listItems] as CheckListItem[],
     };
   },
   created() {
     this.fetchTemplates();
+    if (this.checklistId) {
+      this.getCheckList(this.checklistId);
+    } else {
+      const newChecklist: CheckList = {
+        id: '',
+        updatedAt: Date.now().toString(),
+        items: [],
+      };
+      this.createCheckList(newChecklist);
+    }
   },
   computed: {
     ...mapState(useTemplateStore, ['templates']),
-
+    ...mapState(useCheckListStore, ['checklist']),
     progressPercentage() {
-      const checkedItems = this.items.filter((item) => item.checked);
-      console.log(this.templates);
-      return Math.floor((checkedItems.length / this.items.length) * 100);
+      if (!this.checklist || !this.checklist.length) {
+        return 0;
+      }
+
+      const checkedItems = this.checklist.items.filter((item) => item.checked);
+      return Math.floor(
+        (checkedItems.length / this.checklist.items.length) * 100
+      );
     },
   },
   methods: {
     ...mapActions(useTemplateStore, ['fetchTemplates']),
+    ...mapActions(useCheckListStore, [
+      'getCheckList',
+      'createCheckList',
+      'updateCheckList',
+      'deleteCheckList',
+    ]),
     selectTemplate(template: Template) {
-      console.log(template);
-      this.items.push(...template.items);
+      this.checklist.items.push(...template.items);
+      this.saveList(this.checklist.items);
     },
-
+    deleteCheckList() {
+      this.deleteCheckList(this.checklistId);
+      this.$destroy();
+    },
     saveList(items: CheckListItem[]) {
-      console.log('save to pinia', items);
+      this.checklist.items = items;
+      this.updateCheckList(this.checklist);
     },
   },
 };
