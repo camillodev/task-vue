@@ -181,9 +181,34 @@ export default {
 
     &:focus-within,
     &:hover {
-      background-color: #f5f5f5;
+      background-color: #188fff52;
+
+      .delete-button {
+        visibility: visible;
+        opacity: 1;
+        transition-delay: 0s;
+      }
     }
 
+    .delete-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0s linear 0.2s, opacity 0.2s linear;
+
+      &:hover {
+        color: #1890ff;
+      }
+
+      .anticon {
+        font-size: 16px;
+      }
+    }
     &.is-dragging {
       opacity: 0;
       transition: opacity 0.3s;
@@ -228,34 +253,8 @@ export default {
     flex-grow: 1;
 
     &:focus {
-      background-color: #f5f5f5;
+      background-color: none;
     }
-  }
-
-  .delete-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s linear 0.2s, opacity 0.2s linear;
-
-    &:hover {
-      color: #ff4d4f;
-    }
-
-    .anticon {
-      font-size: 16px;
-    }
-  }
-
-  &:hover .delete-button {
-    visibility: visible;
-    opacity: 1;
-    transition-delay: 0s;
   }
 }
 
