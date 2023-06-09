@@ -61,6 +61,7 @@ export default {
 
   &-header {
     display: flex;
+    margin-bottom: 15px;
   }
 }
 
