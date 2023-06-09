@@ -54,3 +54,24 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.checklist {
+  font-family: Arial, sans-serif;
+
+  &-header {
+    display: flex;
+  }
+}
+
+.anticon {
+  margin-right: 8px;
+}
+
+.ant-btn {
+  margin-left: 10px;
+  .anticon {
+    margin-right: 0;
+  }
+}
+</style>

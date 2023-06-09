@@ -1,6 +1,5 @@
 <template>
   <div class="checklist">
-    <h1>checklist</h1>
     <div
       v-for="(item, index) in internalItems"
       :key="index"
