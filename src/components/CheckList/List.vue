@@ -15,8 +15,9 @@
       @dragleave="dragLeave"
       @drop="drop($event)"
       @dragend="dragLeave">
-      <a-icon type="menu" />
+      <a-icon class="menu-icon" type="menu" />
       <a-checkbox
+        class="checkbox"
         v-model="item.checked"
         @click="saveItem(index)"
         :data-testid="`checkbox-${index}`"></a-checkbox>
@@ -177,43 +178,32 @@ export default {
     cursor: pointer;
     padding: 8px;
     border-bottom: 1px solid #ccc;
+    transition: background-color 0.3s;
 
     &:focus-within,
     &:hover {
-      .delete-button {
-        visibility: visible;
-        opacity: 1;
-        transition-delay: 0s;
-      }
-    }
-
-    .delete-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: transparent;
-      border: none;
-      cursor: pointer;
-      visibility: hidden;
-      opacity: 0;
-      transition: visibility 0s linear 0.2s, opacity 0.2s linear;
-
-      &:hover {
-        color: #1890ff;
-      }
-
-      .anticon {
-        font-size: 16px;
-      }
+      background-color: #f5f5f5;
     }
 
     &.is-dragging {
-      opacity: 0.5;
+      opacity: 0;
+      transition: opacity 0.3s;
     }
 
     &.is-drag-over {
-      border-bottom: 2px solid blue;
+      border-bottom: 2px solid #1890ff;
     }
+  }
+
+  .menu-icon {
+    margin-right: 8px;
+    font-size: 20px;
+    color: #1890ff;
+  }
+
+  .checkbox {
+    margin-right: 8px;
+    color: #1890ff;
   }
 
   .checklist-item-input {
@@ -230,6 +220,32 @@ export default {
       background-color: #f5f5f5;
     }
   }
+
+  .delete-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s linear 0.2s, opacity 0.2s linear;
+
+    &:hover {
+      color: #ff4d4f;
+    }
+
+    .anticon {
+      font-size: 16px;
+    }
+  }
+
+  &:hover .delete-button {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
+  }
 }
 
 .anticon {
@@ -241,7 +257,7 @@ a-checkbox span.ant-checkbox-inner {
 }
 
 a-checkbox.ant-checkbox-checked span.ant-checkbox-inner {
-  background-color: #0052cc;
-  border-color: #0052cc;
+  background-color: #1890ff;
+  border-color: #1890ff;
 }
 </style>
