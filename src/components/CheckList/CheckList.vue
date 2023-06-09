@@ -2,38 +2,16 @@
   <div class="checklist">
     <div class="checklist-header">
       <a-progress :percent="progressPercentage" />
-      <a-dropdown>
-        <a-menu slot="overlay">
-          <a-menu-item
-            v-for="template in templates"
-            :key="template.id"
-            @click="selectTemplate(template)">
-            {{ template.value }}
-          </a-menu-item>
-        </a-menu>
-        <a-button> Load Template <a-icon type="down" /> </a-button>
-      </a-dropdown>
-      <a-dropdown>
-        <a-menu slot="overlay">
-          <a-menu-item @click="saveAsTemplate"> Save as Template </a-menu-item>
-          <a-menu-item @click="navigateToTemplateManager">
-            Manage Templates
-          </a-menu-item>
-          <a-menu-item @click="onDeleteCheckList">
-            Delete Checklist
-          </a-menu-item>
-        </a-menu>
-        <a-button>
-          <a-icon type="ellipsis" />
-        </a-button>
-      </a-dropdown>
+      <a-button @click="onDeleteCheckList" type="primary" ghost
+        >Clean Checklist</a-button
+      >
     </div>
     <List :items="checklistItems" @save="saveList" />
   </div>
 </template>
 
 <script lang="ts">
-import { CheckList, CheckListItem, Template } from './interfaces';
+import { CheckListItem, Template } from './interfaces';
 import List from './List.vue';
 import { mapActions, mapState } from 'pinia';
 import { useTemplateStore, useCheckListStore } from './store';
@@ -68,6 +46,8 @@ export default {
     ...mapState(useTemplateStore, ['templates']),
     ...mapState(useCheckListStore, ['checklist']),
     checklistItems() {
+      // console.log('----- computed checklistItems');
+      // console.log(this.checklist.items);
       return this.checklist
         ? this.checklist.items.map((item) => ({ ...item }))
         : [];
@@ -87,6 +67,7 @@ export default {
       'updateCheckList',
       'deleteCheckList',
     ]),
+
     selectTemplate(template: Template) {
       this.checklist.items.push(...template.items);
       this.saveList(this.checklist.items);
