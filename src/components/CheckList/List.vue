@@ -1,5 +1,6 @@
 <template>
   <div class="checklist">
+    <h1>checklist</h1>
     <div
       v-for="(item, index) in internalItems"
       :key="index"
@@ -18,7 +19,7 @@
       <a-icon type="menu" />
       <a-checkbox
         v-model="item.checked"
-        @click="emitSave()"
+        @click="saveItem(index)"
         :data-testid="`checkbox-${index}`"></a-checkbox>
       <input
         type="text"
@@ -33,36 +34,52 @@
 </template>
 
 <script lang="ts">
-import { CheckListItem } from './interfaces';
+import { mapActions, mapState } from 'pinia';
+import { useCheckListStore } from './store';
 
 export default {
   name: 'ListComponent',
   props: {
-    items: {
-      type: Array as () => CheckListItem[],
-      required: true,
+    id: {
+      type: String,
+      required: false,
+    },
+  },
+  computed: {
+    ...mapState(useCheckListStore, ['checklist']),
+
+    internalItems() {
+      if (
+        !this.checklist ||
+        !this.checklist.items ||
+        this.checklist.items.length === 0
+      ) {
+        return [{ text: '', checked: false }];
+      }
+      return this.checklist.items;
     },
   },
   data() {
     return {
-      internalItems: [
-        {
-          text: '',
-          checked: false,
-        },
-      ],
       debounceTimeout: null,
       draggingIndex: null,
       dragOverIndex: null,
     };
   },
-  created() {
-    if (this.items.length > 0) {
-      this.internalItems = this.items;
+  mounted() {
+    if (this.id) {
+      this.getCheckList(this.id);
+    } else {
+      this.createCheckList();
     }
   },
-
   methods: {
+    ...mapActions(useCheckListStore, [
+      'getCheckList',
+      'createCheckList',
+      'updateCheckList',
+      'deleteCheckList',
+    ]),
     saveItem(index) {
       if (this.internalItems[index].text.trim() === '') {
         this.internalItems.splice(index, 1);
@@ -92,40 +109,35 @@ export default {
 
       this.emitSave();
     },
-
     emitSave() {
       clearTimeout(this.debounceTimeout);
       this.debounceTimeout = setTimeout(() => {
-        this.$emit('save', this.internalItems);
+        const checklist = {
+          ...this.checklist,
+          items: [...this.internalItems],
+        };
+        this.updateCheckList(checklist);
       }, 3000);
     },
-
     drag(event, index) {
       this.draggingIndex = index;
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/html', event.target.innerHTML);
     },
-
     dragEnter(event, index) {
       event.preventDefault();
       this.dragOverIndex = index;
     },
-
     dragOver(event, index) {
       event.preventDefault();
       this.dragOverIndex = index;
     },
-
     dragLeave() {
       if (this.draggingIndex !== null) {
         this.dragOverIndex = this.draggingIndex;
       } else {
         this.dragOverIndex = null;
       }
-    },
-
-    allowDrop(event) {
-      event.preventDefault();
     },
     drop(event) {
       event.preventDefault();

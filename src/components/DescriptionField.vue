@@ -1,8 +1,7 @@
 <template>
   <div class="description-field">
     <div class="checklist-wrapper">
-      <CheckListComponent v-if="checklistId" :checklist-id="checklistId" />
-      <CheckListComponent v-else />
+      <CheckListComponent :id="checklistId || undefined" />
     </div>
   </div>
 </template>
@@ -21,10 +20,14 @@ export default {
     };
   },
   created() {
-    const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
-    this.checklistId = checklists.length > 0 ? checklists[0].id : '';
+    this.loadChecklistId();
   },
-  methods: {},
+  methods: {
+    loadChecklistId() {
+      const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
+      this.checklistId = checklists.length > 0 ? checklists[0].id : '';
+    },
+  },
 };
 </script>
 

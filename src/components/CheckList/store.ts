@@ -1,68 +1,11 @@
 import { defineStore } from 'pinia';
-import { CheckList, CheckListItem, Template } from './interfaces';
+import { CheckList, CheckListItem } from './interfaces';
 import { FakeHttpApi } from '../../httpApi';
 const httpApi = new FakeHttpApi();
 
-export const useTemplateStore = defineStore('templateStore', {
-  state: () => ({
-    templates: [] as Template[],
-  }),
-  actions: {
-    async fetchTemplates() {
-      try {
-        const { data } = await httpApi.getTemplates();
-        this.templates = data;
-      } catch (error) {
-        console.error('Failed to fetch templates:', error);
-      }
-    },
-    async addTemplate(template) {
-      try {
-        const { data } = await httpApi.createTemplate({ template });
-        this.templates.push(data);
-      } catch (error) {
-        console.error('Failed to add template:', error);
-      }
-    },
-    async updateTemplate(updatedTemplate) {
-      try {
-        const { data } = await httpApi.updateTemplate({
-          id: updatedTemplate.id,
-          template: updatedTemplate,
-        });
-        const index = this.templates.findIndex(
-          (template) => template.id === updatedTemplate.id
-        );
-        if (index !== -1) {
-          this.templates.splice(index, 1, data);
-        }
-      } catch (error) {
-        console.error('Failed to update template:', error);
-      }
-    },
-    async deleteTemplate(templateId) {
-      try {
-        await httpApi.deleteTemplate({ id: templateId });
-        const index = this.templates.findIndex(
-          (template) => template.id === templateId
-        );
-        if (index !== -1) {
-          this.templates.splice(index, 1);
-        }
-      } catch (error) {
-        console.error('Failed to delete template:', error);
-      }
-    },
-  },
-});
-
 export const useCheckListStore = defineStore('checklistStore', {
   state: () => ({
-    checklist: {
-      id: '',
-      updatedAt: Date.now().toString(),
-      items: [],
-    } as CheckList,
+    checklist: {} as CheckList,
   }),
   actions: {
     async getCheckList(id: string) {
@@ -97,7 +40,9 @@ export const useCheckListStore = defineStore('checklistStore', {
         const checklist: CheckList = {
           id: '',
           updatedAt: Date.now().toString(),
-          items: [],
+          items: [
+            { text: '', checked: false, updatedAt: Date.now().toString() },
+          ],
         };
         const { data } = await httpApi.createCheckList({ checklist });
         this.checklist = data;
