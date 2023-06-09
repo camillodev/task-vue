@@ -25,9 +25,13 @@
         class="checklist-item-input"
         v-model="item.text"
         :ref="`input-${index}`"
-        @input="emitSave()"
-        @blur="$emit('save', internalItems)"
-        @keyup.enter="saveItemAndAddNew(index)" />
+        @input="saveChecklist()"
+        @blur="saveChecklist"
+        @keyup.enter="saveItemAndAddNew(index)"
+        @keydown.delete="cleanItem(index)" />
+      <button @click="deleteItem(index)" class="delete-button">
+        <a-icon type="delete" />
+      </button>
     </div>
   </div>
 </template>
@@ -77,13 +81,23 @@ export default {
       'getCheckList',
       'createCheckList',
       'updateCheckList',
-      'deleteCheckList',
     ]),
+
+    cleanItem(index) {
+      const currentItem = this.internalItems[index];
+      if (currentItem.text.trim() === '') {
+        this.deleteItem(index);
+      }
+    },
+    deleteItem(index) {
+      this.internalItems.splice(index, 1);
+      this.saveChecklist();
+    },
     saveItem(index) {
       if (this.internalItems[index].text.trim() === '') {
         this.internalItems.splice(index, 1);
       }
-      this.emitSave();
+      this.saveChecklist();
     },
     saveItemAndAddNew(index) {
       const currentItem = this.internalItems[index];
@@ -106,9 +120,9 @@ export default {
         newInput?.setSelectionRange(0, 0);
       });
 
-      this.emitSave();
+      this.saveChecklist();
     },
-    emitSave() {
+    saveChecklist() {
       clearTimeout(this.debounceTimeout);
       this.debounceTimeout = setTimeout(() => {
         const checklist = {
@@ -146,7 +160,7 @@ export default {
         this.internalItems.splice(this.dragOverIndex, 0, draggedItem);
         this.draggingIndex = null;
         this.dragOverIndex = null;
-        this.emitSave();
+        this.saveChecklist();
       }
     },
   },
@@ -157,16 +171,41 @@ export default {
 .checklist {
   font-family: Arial, sans-serif;
 
-  &-header {
-    display: flex;
-  }
-
   &-item {
     display: flex;
     align-items: center;
     cursor: pointer;
     padding: 8px;
     border-bottom: 1px solid #ccc;
+
+    &:focus-within,
+    &:hover {
+      .delete-button {
+        visibility: visible;
+        opacity: 1;
+        transition-delay: 0s;
+      }
+    }
+
+    .delete-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0s linear 0.2s, opacity 0.2s linear;
+
+      &:hover {
+        color: #1890ff;
+      }
+
+      .anticon {
+        font-size: 16px;
+      }
+    }
 
     &.is-dragging {
       opacity: 0.5;
@@ -177,7 +216,7 @@ export default {
     }
   }
 
-  &-item-input {
+  .checklist-item-input {
     border: none;
     font-size: 14px;
     line-height: 1.5;
@@ -196,6 +235,7 @@ export default {
 .anticon {
   margin-right: 8px;
 }
+
 a-checkbox span.ant-checkbox-inner {
   border-radius: 2px;
 }
