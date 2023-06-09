@@ -177,7 +177,6 @@ export default {
     align-items: center;
     cursor: pointer;
     padding: 8px;
-    border-bottom: 1px solid #ccc;
     transition: background-color 0.3s;
 
     &:focus-within,
@@ -190,8 +189,20 @@ export default {
       transition: opacity 0.3s;
     }
 
+    &:not(.is-drag-over):not(:last-child) {
+      border: none;
+    }
+
+    &:first-child.is-drag-over {
+      border-top: 1px solid #1890ff;
+    }
+
+    &:last-child.is-drag-over {
+      border-bottom: 1px solid #1890ff;
+    }
+
     &.is-drag-over {
-      border-bottom: 2px solid #1890ff;
+      border: 1px solid #1890ff;
     }
   }
 
