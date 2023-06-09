@@ -49,7 +49,7 @@ export default {
     ...mapActions(useCheckListStore, ['deleteCheckList']),
 
     onDeleteCheckList() {
-      this.deleteCheckList(this.id);
+      this.deleteCheckList(this.checklist.id);
     },
   },
 };
