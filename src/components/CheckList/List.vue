@@ -41,6 +41,7 @@
 <script lang="ts">
 import { mapActions, mapState } from 'pinia';
 import { useCheckListStore } from './store';
+import debounce from 'lodash.debounce';
 
 export default {
   name: 'ListComponent',
@@ -66,7 +67,6 @@ export default {
   },
   data() {
     return {
-      debounceTimeout: null,
       draggingIndex: null,
       dragOverIndex: null,
     };
@@ -86,8 +86,8 @@ export default {
     ]),
 
     cleanItem(index) {
-      const currentItem = this.internalItems[index];
-      if (currentItem.text.trim() === '') {
+      const { internalItems } = this;
+      if (internalItems[index].text.trim() === '') {
         this.deleteItem(index);
       }
     },
@@ -96,24 +96,26 @@ export default {
       this.saveChecklist();
     },
     saveItem(index) {
+      const { internalItems } = this;
       if (
-        this.internalItems &&
-        this.internalItems[index] &&
-        this.internalItems[index].text.trim() === ''
+        internalItems &&
+        internalItems[index] &&
+        internalItems[index].text.trim() === ''
       ) {
-        this.internalItems.splice(index, 1);
+        internalItems.splice(index, 1);
       }
       this.saveChecklist();
     },
     saveItemAndAddNew(index) {
-      const currentItem = this.internalItems[index];
+      const { internalItems } = this;
+      const currentItem = internalItems[index];
       const cursorPosition = this.$el.querySelectorAll('.checklist-item-input')[
         index
       ].selectionStart;
       const remainingText = currentItem.text.substring(cursorPosition);
       currentItem.text = currentItem.text.substring(0, cursorPosition).trim();
 
-      this.internalItems.splice(index + 1, 0, {
+      internalItems.splice(index + 1, 0, {
         text: remainingText,
         checked: false,
       });
@@ -128,16 +130,13 @@ export default {
 
       this.saveChecklist();
     },
-    saveChecklist() {
-      clearTimeout(this.debounceTimeout);
-      this.debounceTimeout = setTimeout(() => {
-        const checklist = {
-          ...this.checklist,
-          items: [...this.internalItems],
-        };
-        this.updateCheckList(checklist);
-      }, 3000);
-    },
+    saveChecklist: debounce(function () {
+      const checklist = {
+        ...this.checklist,
+        items: [...this.internalItems],
+      };
+      this.updateCheckList(checklist);
+    }, 3000),
     drag(event, index) {
       this.draggingIndex = index;
       event.dataTransfer.effectAllowed = 'move';
