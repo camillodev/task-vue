@@ -188,11 +188,21 @@ export default {
     &:hover {
       background-color: #188fff52;
 
-      .delete-button {
+      .delete-button,
+      .menu-icon {
         visibility: visible;
         opacity: 1;
         transition-delay: 0s;
       }
+    }
+
+    .menu-icon {
+      margin-right: 8px;
+      font-size: 20px;
+      color: #1890ff;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0s linear 0.2s, opacity 0.2s linear;
     }
 
     .delete-button {
@@ -214,6 +224,7 @@ export default {
         font-size: 16px;
       }
     }
+
     &.is-dragging {
       opacity: 0;
       transition: opacity 0.3s;
@@ -234,12 +245,6 @@ export default {
     &.is-drag-over {
       border: 1px solid #1890ff;
     }
-  }
-
-  .menu-icon {
-    margin-right: 8px;
-    font-size: 20px;
-    color: #1890ff;
   }
 
   .checkbox {
