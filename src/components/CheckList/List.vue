@@ -20,7 +20,8 @@
         class="checkbox"
         v-model="item.checked"
         @click="saveItem(index)"
-        :data-testid="`checkbox-${index}`"></a-checkbox>
+        :data-testid="`checkbox-${index}`"
+        :disabled="item.text.trim() === ''"></a-checkbox>
       <input
         type="text"
         class="checklist-item-input"
@@ -95,7 +96,11 @@ export default {
       this.saveChecklist();
     },
     saveItem(index) {
-      if (this.internalItems[index].text.trim() === '') {
+      if (
+        this.internalItems &&
+        this.internalItems[index] &&
+        this.internalItems[index].text.trim() === ''
+      ) {
         this.internalItems.splice(index, 1);
       }
       this.saveChecklist();
