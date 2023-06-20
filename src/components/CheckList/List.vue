@@ -1,50 +1,53 @@
 <template>
   <div class="checklist">
-    <div
-      v-for="(item, index) in internalItems"
-      :key="index"
-      class="checklist-item"
-      :class="{
-        'is-dragging': draggingIndex === index,
-        'is-drag-over': dragOverIndex === index,
-      }"
-      draggable="true"
-      @dragstart="drag($event, index)"
-      @dragenter="dragEnter($event, index)"
-      @dragover="dragOver($event, index)"
-      @dragleave="dragLeave"
-      @drop="drop($event)"
-      @dragend="dragLeave">
-      <a-icon class="menu-icon" type="menu" />
-      <a-checkbox
-        class="checkbox"
-        v-model="item.checked"
-        @click="saveItem(index)"
-        :data-testid="`checkbox-${index}`"
-        :disabled="item.text.trim() === ''"></a-checkbox>
-      <input
-        type="text"
-        class="checklist-item-input"
-        v-model="item.text"
-        :ref="`input-${index}`"
-        @input="saveChecklist()"
-        @blur="saveChecklist"
-        @keyup.enter="saveItemAndAddNew(index)"
-        @keydown.delete="cleanItem(index)" />
-      <button @click="deleteItem(index)" class="delete-button">
-        <a-icon type="delete" />
-      </button>
-    </div>
+    <draggable
+      v-model="internalItems"
+      handle=".menu-icon"
+      @end="saveChecklist"
+      class="checklist-draggable"
+      :options="{
+        animation: 150,
+        dragClass: 'dragging',
+        chosenClass: 'chosen',
+      }">
+      <div
+        v-for="(item, index) in internalItems"
+        :key="index"
+        class="checklist-item"
+        :class="{ 'is-dragging': draggingIndex === index }">
+        <a-icon class="menu-icon" type="menu" />
+        <a-checkbox
+          class="checkbox"
+          v-model="item.checked"
+          @click="saveItem(index)"
+          :data-testid="`checkbox-${index}`"
+          :disabled="item.text.trim() === ''"></a-checkbox>
+        <input
+          type="text"
+          class="checklist-item-input"
+          v-model="item.text"
+          :ref="`input-${index}`"
+          @input="saveChecklist()"
+          @blur="saveChecklist"
+          @keyup.enter="saveItemAndAddNew(index)"
+          @keydown.delete="cleanItem(index)" />
+        <button @click="deleteItem(index)" class="delete-button">
+          <a-icon type="delete" />
+        </button>
+      </div>
+    </draggable>
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { mapActions, mapState } from 'pinia';
 import { useCheckListStore } from './store';
+import draggable from 'vuedraggable';
 import debounce from 'lodash.debounce';
 
 export default {
   name: 'ListComponent',
+  components: { draggable },
   props: {
     id: {
       type: String,
@@ -84,7 +87,6 @@ export default {
       'createCheckList',
       'updateCheckList',
     ]),
-
     cleanItem(index) {
       const { internalItems } = this;
       if (internalItems[index].text.trim() === '') {
@@ -137,37 +139,6 @@ export default {
       };
       this.updateCheckList(checklist);
     }, 3000),
-    drag(event, index) {
-      this.draggingIndex = index;
-      event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('text/html', event.target.innerHTML);
-    },
-    dragEnter(event, index) {
-      event.preventDefault();
-      this.dragOverIndex = index;
-    },
-    dragOver(event, index) {
-      event.preventDefault();
-      this.dragOverIndex = index;
-    },
-    dragLeave() {
-      if (this.draggingIndex !== null) {
-        this.dragOverIndex = this.draggingIndex;
-      } else {
-        this.dragOverIndex = null;
-      }
-    },
-    drop(event) {
-      event.preventDefault();
-      if (this.draggingIndex !== null && this.dragOverIndex !== null) {
-        const draggedItem = this.internalItems[this.draggingIndex];
-        this.internalItems.splice(this.draggingIndex, 1);
-        this.internalItems.splice(this.dragOverIndex, 0, draggedItem);
-        this.draggingIndex = null;
-        this.dragOverIndex = null;
-        this.saveChecklist();
-      }
-    },
   },
 };
 </script>

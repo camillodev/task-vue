@@ -10,6 +10,8 @@ module.exports = {
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^@/components/CheckList/store$':
+      '<rootDir>/src/components/CheckList/store.ts',
   },
   moduleFileExtensions: ['js', 'json', 'vue', 'spec.js'],
   preset: '@vue/cli-plugin-unit-jest',
